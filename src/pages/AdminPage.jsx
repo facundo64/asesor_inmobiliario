@@ -43,22 +43,44 @@ export const AdminPage = ({ user, onLogin, onLogout, leads, properties, onUpdate
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-gray-100"><tr><th className="p-3">Nombre</th><th className="p-3">Contacto</th><th className="p-3">Presupuesto</th><th className="p-3">Estado</th><th className="p-3">Acciones</th></tr></thead>
+                        <thead className="bg-gray-100">
+                            <tr>
+                                <th className="p-3">Nombre</th>
+                                <th className="p-3">Contacto</th>
+                                <th className="p-3">Estado</th>
+                                <th className="p-3">Acciones</th>
+                            </tr>
+                        </thead>
                         <tbody>
-                            {leads.length === 0 ? ( <tr><td colSpan="5" className="text-center p-4 text-gray-500">No hay clientes.</td></tr> ) : (
+                            {leads.length === 0 ? (
+                                <tr><td colSpan="4" className="text-center p-4 text-gray-500">No hay clientes.</td></tr>
+                            ) : (
                                 leads.map(lead => (
                                     <tr key={lead.id} className="border-b">
-                                        <td className="p-3 align-top"><p className="font-bold">{lead.fullName}</p><p className="text-sm text-gray-500">{new Date(lead.date).toLocaleDateString()}</p></td>
-                                        <td className="p-3 text-sm align-top"> <p>{lead.email}</p> <p>{lead.phone}</p> {lead.message && <p className="mt-2 pt-2 border-t border-gray-200 text-xs text-gray-500 italic">"{lead.message}"</p>} </td>
-                                        <td className="p-3 align-top">${lead.budget ? Number(lead.budget).toLocaleString() : 'N/A'}</td>
-                                        <td className="p-3 align-top"><span className="flex items-center"><span className={`status-dot ${statusStyles[lead.status]?.color || 'bg-gray-400'}`}></span>{statusStyles[lead.status]?.text || 'N/A'}</span></td>
-                                        <td className="p-3 align-top"><div className="flex items-center space-x-1">
-                                            <button onClick={() => onOpenNotesModal(lead)} title="Notas" className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200"><i className="fas fa-clipboard"></i></button>
-                                            <button onClick={() => onUpdateLeadStatus(lead.id, 'aceptado')} title="Aceptado" className="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-600 hover:bg-green-200"><i className="fas fa-check"></i></button>
-                                            <button onClick={() => onUpdateLeadStatus(lead.id, 'potencial')} title="Potencial" className="w-8 h-8 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600 hover:bg-yellow-200"><i className="fas fa-user-clock"></i></button>
-                                            <button onClick={() => onUpdateLeadStatus(lead.id, 'rechazado')} title="Rechazado" className="w-8 h-8 flex items-center justify-center rounded-full bg-red-100 text-red-600 hover:bg-red-200"><i className="fas fa-times"></i></button>
-                                            <button onClick={() => onDeleteLead(lead.id)} title="Eliminar" className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300"><i className="fas fa-trash"></i></button>
-                                        </div></td>
+                                        <td className="p-3 align-top">
+                                            <p className="font-bold">{lead.fullName}</p>
+                                            <p className="text-sm text-gray-500">{new Date(lead.date).toLocaleDateString()}</p>
+                                        </td>
+                                        <td className="p-3 text-sm align-top">
+                                            <p>{lead.email}</p>
+                                            <p>{lead.phone}</p>
+                                            {lead.message && <p className="mt-2 pt-2 border-t border-gray-200 text-xs text-gray-500 italic">"{lead.message}"</p>}
+                                        </td>
+                                        <td className="p-3 align-top">
+                                            <span className="flex items-center">
+                                                <span className={`status-dot ${statusStyles[lead.status]?.color || 'bg-gray-400'}`}></span>
+                                                {statusStyles[lead.status]?.text || 'N/A'}
+                                            </span>
+                                        </td>
+                                        <td className="p-3 align-top">
+                                            <div className="flex items-center space-x-1">
+                                                <button onClick={() => onOpenNotesModal(lead)} title="Notas" className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200"><i className="fas fa-clipboard"></i></button>
+                                                <button onClick={() => onUpdateLeadStatus(lead.id, 'aceptado')} title="Aceptado" className="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-600 hover:bg-green-200"><i className="fas fa-check"></i></button>
+                                                <button onClick={() => onUpdateLeadStatus(lead.id, 'potencial')} title="Potencial" className="w-8 h-8 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600 hover:bg-yellow-200"><i className="fas fa-user-clock"></i></button>
+                                                <button onClick={() => onUpdateLeadStatus(lead.id, 'rechazado')} title="Rechazado" className="w-8 h-8 flex items-center justify-center rounded-full bg-red-100 text-red-600 hover:bg-red-200"><i className="fas fa-times"></i></button>
+                                                <button onClick={() => onDeleteLead(lead.id)} title="Eliminar" className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300"><i className="fas fa-trash"></i></button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))
                             )}

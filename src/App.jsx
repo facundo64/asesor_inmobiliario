@@ -199,7 +199,9 @@ export default function App() {
     return (
         <div className="text-dark">
             <Header currentPage={currentPage} navigate={navigate} />
-            <main className="container mx-auto px-6 py-8"> {renderPage()} </main>
+            <main className="container mx-auto px-4 md:px-6 py-4 md:py-8">
+                {renderPage()}
+            </main>
             
             <PropertyModal property={selectedProperty} onClose={() => setSelectedProperty(null)} />
             <NotesModal lead={selectedLeadForNotes} onClose={() => setSelectedLeadForNotes(null)} onSaveNote={saveNoteToLead} />
