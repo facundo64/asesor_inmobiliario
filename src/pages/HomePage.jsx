@@ -6,13 +6,13 @@ export const HomePage = ({ onAddLead }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
+        // CORREGIDO: Eliminamos la creación de 'id' y 'date' aquí.
+        // Firestore se encargará de generar el ID y la fecha de creación.
         const newLead = {
-            id: Date.now(),
             fullName: formData.get('fullName'),
             email: formData.get('email'),
             phone: formData.get('phone'),
             message: formData.get('message'),
-            date: new Date().toISOString(),
             status: 'potencial',
             notes: []
         };

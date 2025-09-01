@@ -1,7 +1,19 @@
 import React, { useState } from 'react';
 
-
-export const AdminPage = ({ user, onLogin, onLogout, leads, properties, onUpdateLeadStatus, onDeleteLead, onDeleteProperty, onOpenPropertyForm, onEditProperty, onOpenNotesModal, onDownloadCSV }) => {
+export const AdminPage = ({ 
+    user, 
+    onLogin, 
+    onLogout, 
+    leads, 
+    properties, 
+    onUpdateLeadStatus, 
+    onDeleteLead, 
+    onDeleteProperty, 
+    onOpenPropertyForm, 
+    onEditProperty, 
+    onOpenNotesModal, 
+    onDownloadCSV 
+}) => {
     const [loading, setLoading] = useState(false);
 
     const handleLogin = async (e) => {
@@ -60,7 +72,7 @@ export const AdminPage = ({ user, onLogin, onLogout, leads, properties, onUpdate
                                     <tr key={lead.id} className="border-b">
                                         <td className="p-3 align-top">
                                             <p className="font-bold">{lead.fullName}</p>
-                                            <p className="text-sm text-gray-500">{new Date(lead.date).toLocaleDateString()}</p>
+                                            <p className="text-sm text-gray-500">{new Date(lead.createdAt.toDate()).toLocaleDateString()}</p>
                                         </td>
                                         <td className="p-3 text-sm align-top">
                                             <p>{lead.email}</p>

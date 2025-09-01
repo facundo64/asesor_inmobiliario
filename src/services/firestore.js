@@ -5,8 +5,7 @@ import {
     updateDoc, 
     deleteDoc, 
     doc, 
-    query, 
-    orderBy 
+    query
 } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 
@@ -20,27 +19,28 @@ const checkAuth = () => {
 // Leads
 export const addLead = async (leadData) => {
     try {
-        console.log('Intentando añadir lead:', leadData); // Debug
         const docRef = await addDoc(collection(db, "leads"), {
             ...leadData,
             createdAt: new Date()
         });
-        console.log('Lead añadido con ID:', docRef.id); // Debug
-        return { id: docRef.id, ...leadData };
+        return { id: docRef.id, ...leadData, createdAt: new Date() };
     } catch (error) {
-        console.error("Error detallado al añadir lead:", error); // Debug
+        console.error("Error detallado al añadir lead:", error);
         throw error;
     }
 };
 
 export const getLeads = async () => {
     try {
-        const q = query(collection(db, "leads"), orderBy("createdAt", "desc"));
+        checkAuth(); // Asegurarse que solo usuarios logueados pueden llamar esta función
+        const q = query(collection(db, "leads"));
         const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({
+        const leads = querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
+        // Ordenamos los leads en el cliente (más reciente primero)
+        return leads.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
     } catch (error) {
         console.error("Error getting leads: ", error);
         throw error;
@@ -49,6 +49,7 @@ export const getLeads = async () => {
 
 export const updateLeadStatus = async (leadId, newStatus) => {
     try {
+        checkAuth();
         const leadRef = doc(db, "leads", leadId);
         await updateDoc(leadRef, { status: newStatus });
     } catch (error) {
@@ -59,6 +60,7 @@ export const updateLeadStatus = async (leadId, newStatus) => {
 
 export const deleteLead = async (leadId) => {
     try {
+        checkAuth();
         await deleteDoc(doc(db, "leads", leadId));
     } catch (error) {
         console.error("Error deleting lead: ", error);
@@ -69,15 +71,12 @@ export const deleteLead = async (leadId) => {
 // Properties
 export const addProperty = async (propertyData) => {
     try {
-        checkAuth(); // Verificar autenticación
+        checkAuth();
         
-        console.log('Intentando añadir propiedad:', propertyData); // Debug
-        
-        // Asegurarse de que los campos necesarios estén presentes
         const propertyToAdd = {
             ...propertyData,
             createdAt: new Date(),
-            createdBy: auth.currentUser.uid, // Agregar referencia al usuario
+            createdBy: auth.currentUser.uid,
             type: propertyData.type || 'venta',
             price: Number(propertyData.price) || 0,
             size: Number(propertyData.size) || 0,
@@ -88,39 +87,35 @@ export const addProperty = async (propertyData) => {
         };
 
         const docRef = await addDoc(collection(db, "properties"), propertyToAdd);
-        console.log('Propiedad añadida con ID:', docRef.id); // Debug
-        
         return { id: docRef.id, ...propertyToAdd };
     } catch (error) {
-        console.error("Error detallado al añadir propiedad:", error); // Debug
+        console.error("Error detallado al añadir propiedad:", error);
         throw error;
     }
 };
 
 export const getProperties = async () => {
     try {
-        console.log('Intentando obtener propiedades...'); // Debug
-        const q = query(collection(db, "properties"), orderBy("createdAt", "desc"));
+        const q = query(collection(db, "properties"));
         const querySnapshot = await getDocs(q);
         const properties = querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate() // Convertir Timestamp a Date
+            createdAt: doc.data().createdAt?.toDate() // Convertir Timestamp a Date si existe
         }));
-        console.log('Propiedades obtenidas:', properties); // Debug
-        return properties;
+        // Ordenamos las propiedades en el cliente (más reciente primero)
+        return properties.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     } catch (error) {
-        console.error("Error detallado al obtener propiedades:", error); // Debug
+        console.error("Error detallado al obtener propiedades:", error);
         throw error;
     }
 };
 
 export const updateProperty = async (propertyId, propertyData) => {
     try {
-        console.log('Intentando actualizar propiedad:', propertyId, propertyData); // Debug
+        checkAuth();
         const propertyRef = doc(db, "properties", propertyId);
         
-        // Asegurarse de que los campos numéricos sean números
         const updatedData = {
             ...propertyData,
             price: Number(propertyData.price) || 0,
@@ -132,16 +127,16 @@ export const updateProperty = async (propertyId, propertyData) => {
         };
 
         await updateDoc(propertyRef, updatedData);
-        console.log('Propiedad actualizada exitosamente'); // Debug
         return { id: propertyId, ...updatedData };
     } catch (error) {
-        console.error("Error detallado al actualizar propiedad:", error); // Debug
+        console.error("Error detallado al actualizar propiedad:", error);
         throw error;
     }
 };
 
 export const deleteProperty = async (propertyId) => {
     try {
+        checkAuth();
         await deleteDoc(doc(db, "properties", propertyId));
     } catch (error) {
         console.error("Error deleting property: ", error);

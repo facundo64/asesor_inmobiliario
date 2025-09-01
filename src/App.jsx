@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Papa from 'papaparse';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from './firebase';
-import { useLocalStorage } from './hooks/useLocalStorage.js';
 import { HomePage } from './pages/HomePage.jsx';
 import { PortfolioPage } from './pages/PortfolioPage.jsx';
 import { AdminPage } from './pages/AdminPage.jsx';
@@ -21,25 +20,14 @@ import {
     addProperty,
     getProperties,
     updateProperty,
-    deleteProperty 
+    deleteProperty as deletePropertyService
 } from './services/firestore';
-
-
-const getInitialProperties = () => [
-    {id: 1, title: 'Villa de Lujo con Vista al Mar', description: 'Espectacular villa con diseño moderno, piscina infinita y acceso directo a la playa...', price: 2500000, type: 'venta', location: 'Marbella, España', size: 450, images: ['https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', 'https://images.pexels.com/photos/259588/pexels-photo-259588.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], brochure: null, isInvestmentOpportunity: true, advisorAnalysis: "Alto potencial de revalorización por desarrollo turístico en la zona. Ideal para alquiler vacacional de alta gama.", estimatedRental: 15000, annualTaxes: 8000, maintenanceCosts: 5000},
-    {id: 2, title: 'Apartamento Moderno en el Centro', description: 'Luminoso apartamento en el corazón de la ciudad...', price: 450000, type: 'venta', location: 'Buenos Aires, Argentina', size: 95, images: ['https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', 'https://images.pexels.com/photos/271816/pexels-photo-271816.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], brochure: null, isInvestmentOpportunity: false, advisorAnalysis: "Ubicación estratégica para alquiler a largo plazo a profesionales. Rentabilidad estable y bajo riesgo.", estimatedRental: 1200, annualTaxes: 1000, maintenanceCosts: 600},
-    {id: 3, title: 'PH con Terraza Propia en Palermo', description: 'Increíble PH de 3 ambientes con terraza privada, parrilla y jacuzzi. Completamente renovado con estilo industrial.', price: 680000, type: 'venta', location: 'Palermo, Buenos Aires', size: 120, images: ['https://images.pexels.com/photos/210552/pexels-photo-210552.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', 'https://images.pexels.com/photos/2724749/pexels-photo-2724749.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], brochure: null, isInvestmentOpportunity: true, advisorAnalysis: "Propiedad única en una de las zonas más demandadas. Excelente para alquiler temporario a turistas con alta rentabilidad en dólares.", estimatedRental: 2500, annualTaxes: 1500, maintenanceCosts: 800},
-    {id: 4, title: 'Casa Familiar en Nordelta', description: 'Espaciosa casa de 5 ambientes con jardín, piscina y muelle propio sobre la laguna. Seguridad 24hs y amenities de primer nivel.', price: 950000, type: 'venta', location: 'Nordelta, Tigre', size: 320, images: ['https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', 'https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], brochure: null, isInvestmentOpportunity: false, advisorAnalysis: "Inversión en calidad de vida. Aunque la rentabilidad por alquiler es moderada, la revalorización de la tierra en la zona es constante y segura.", estimatedRental: 2000, annualTaxes: 4000, maintenanceCosts: 2500},
-    {id: 5, title: '2 Ambientes Luminoso en Caballito', description: 'Departamento de 2 ambientes con balcón al contrafrente. Muy luminoso y silencioso. A metros del subte y Parque Rivadavia.', price: 900, type: 'renta', location: 'Caballito, Buenos Aires', size: 50, images: ['https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', 'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'], brochure: null, isInvestmentOpportunity: true, advisorAnalysis: "Alta demanda de alquiler en la zona por su conectividad. Ideal para inversores que buscan una renta estable y de bajo mantenimiento.", estimatedRental: 900, annualTaxes: 0, maintenanceCosts: 0}
-];
-
-
 
 export default function App() {
     const [leads, setLeads] = useState([]);
     const [properties, setProperties] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
-    const [authLoading, setAuthLoading] = useState(true); // verifica si Firebase está comprobando el estado de autenticación
+    const [authLoading, setAuthLoading] = useState(true);
     
     const [currentPage, setCurrentPage] = useState('home');
     const [toast, setToast] = useState({ message: '', type: 'success', visible: false });
@@ -55,38 +43,49 @@ export default function App() {
         fontAwesomeLink.rel = 'stylesheet';
         fontAwesomeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
         document.head.appendChild(fontAwesomeLink);
-        
-    
+
         const unsubscribe = onAuthStateChanged(auth, user => {
             setCurrentUser(user);
+            if (user) {
+                // Si el usuario inicia sesión, cargamos los leads.
+                loadLeads();
+            } else {
+                // Si el usuario cierra sesión, limpiamos los leads para seguridad.
+                setLeads([]);
+            }
             setAuthLoading(false);
         });
+        
+        // Cargamos las propiedades, que son públicas, al iniciar la app.
+        loadProperties();
 
         return () => {
             if (document.head.contains(fontAwesomeLink)) {
                 document.head.removeChild(fontAwesomeLink);
             }
-            unsubscribe(); // Limpia el listener al desmontar
+            unsubscribe();
         };
     }, []);
+    
+    const loadLeads = async () => {
+        try {
+            const loadedLeads = await getLeads();
+            setLeads(loadedLeads);
+        } catch (error) {
+            console.error("Error loading leads:", error);
+            showToast('Error al cargar clientes', 'error');
+        }
+    };
 
-    useEffect(() => {
-        // Cargar datos al iniciar
-        const loadData = async () => {
-            try {
-                const loadedLeads = await getLeads();
-                setLeads(loadedLeads);
-                
-                const loadedProperties = await getProperties();
-                setProperties(loadedProperties);
-            } catch (error) {
-                console.error("Error loading data:", error);
-                // Aquí podrías mostrar un mensaje de error al usuario
-            }
-        };
-        
-        loadData();
-    }, []);
+    const loadProperties = async () => {
+        try {
+            const loadedProperties = await getProperties();
+            setProperties(loadedProperties);
+        } catch (error) {
+            console.error("Error loading properties:", error);
+            showToast('Error al cargar propiedades', 'error');
+        }
+    };
 
     const showToast = useCallback((message, type = 'success') => {
         setToast({ message, type, visible: true });
@@ -101,9 +100,8 @@ export default function App() {
     const handleAddLead = async (leadData) => {
         try {
             const newLead = await addLead(leadData);
-            setLeads(prev => [newLead, ...prev]);
+            // Ya no actualizamos el estado local aquí, porque solo el admin puede ver los leads.
             showToast('¡Gracias por tu interés! Nos pondremos en contacto pronto.');
-            console.log('Lead añadido:', newLead); // Para debugging
         } catch (error) {
             console.error("Error adding lead:", error);
             showToast('Error al guardar los datos', 'error');
@@ -118,7 +116,7 @@ export default function App() {
             ));
             showToast('Estado actualizado correctamente');
         } catch (error) {
-            console.error("Error updating lead:", error);
+            console.error("Error updating lead status:", error);
             showToast('Error al actualizar el estado', 'error');
         }
     };
@@ -137,6 +135,7 @@ export default function App() {
     const saveNoteToLead = (leadId, noteText) => {
         const newNote = { text: noteText, date: new Date().toISOString() };
         let updatedLead;
+        // Esta función debería también actualizarse en Firestore, por ahora solo actualiza el estado local.
         setLeads(prevLeads => {
             const newLeads = prevLeads.map(lead => {
                 if (lead.id === leadId) {
@@ -148,10 +147,9 @@ export default function App() {
             return newLeads;
         });
         setSelectedLeadForNotes(updatedLead);
-        showToast('Nota guardada.');
+        showToast('Nota guardada (localmente).');
     };
 
-    // --- FUNCIÓN AUXILIAR PARA CONVERTIR ARCHIVOS A BASE64 ---
     const readFileAsDataURL = (file) => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -161,7 +159,6 @@ export default function App() {
         });
     };
 
-    // --- FUNCIÓN saveProperty ACTUALIZADA ---
     const saveProperty = async (formData, imageFiles, brochureFile) => {
         try {
             let finalData = { ...formData };
@@ -177,18 +174,12 @@ export default function App() {
 
             if (finalData.id) {
                 await updateProperty(finalData.id, finalData);
+                setProperties(prev => prev.map(p => p.id === finalData.id ? finalData : p));
             } else {
                 const newProperty = await addProperty(finalData);
-                finalData = newProperty;
+                setProperties(prev => [newProperty, ...prev]);
             }
-
-            setProperties(prev => {
-                if (finalData.id) {
-                    return prev.map(p => p.id === finalData.id ? finalData : p);
-                }
-                return [...prev, finalData];
-            });
-
+            
             showToast(`Propiedad ${finalData.id ? 'actualizada' : 'agregada'} con éxito.`);
             setPropertyFormOpen(false);
             setEditingProperty(null);
@@ -198,7 +189,16 @@ export default function App() {
         }
     };
 
-    const deleteProperty = (id) => { setProperties(prev => prev.filter(p => p.id !== id)); showToast('Propiedad eliminada.'); };
+    const handleDeleteProperty = async (id) => { 
+        try {
+            await deletePropertyService(id);
+            setProperties(prev => prev.filter(p => p.id !== id)); 
+            showToast('Propiedad eliminada.');
+        } catch(error) {
+            console.error("Error deleting property:", error);
+            showToast('Error al eliminar la propiedad', 'error');
+        }
+    };
     
     const handleLogin = async (email, password) => {
         try {
@@ -242,15 +242,15 @@ export default function App() {
     };
 
     const clearComparison = () => setComparisonList([]);
-    const propertiesToCompare = useMemo(() => properties.filter(p => comparisonList.includes(p.id)), [properties, comparisonList]);
+    const propertiesToCompare = properties.filter(p => comparisonList.includes(p.id));
 
     const renderPage = () => {
         if (authLoading) {
-            return <div className="text-center p-10">Cargando...</div>; // Muestra un loader mientras Firebase verifica
+            return <div className="text-center p-10">Cargando...</div>;
         }
         switch (currentPage) {
             case 'portfolio': return <PortfolioPage properties={properties} onToggleCompare={toggleCompare} onOpenModal={setSelectedProperty} comparisonList={comparisonList} />;
-            case 'admin': return <AdminPage user={currentUser} onLogin={handleLogin} onLogout={handleLogout} leads={leads} properties={properties} onUpdateLeadStatus={updateLeadStatus} onDeleteLead={deleteLead} onDeleteProperty={deleteProperty} onOpenNotesModal={setSelectedLeadForNotes} onOpenPropertyForm={() => { setEditingProperty(null); setPropertyFormOpen(true); }} onEditProperty={(prop) => { setEditingProperty(prop); setPropertyFormOpen(true); }} onDownloadCSV={downloadCSV} />;
+            case 'admin': return <AdminPage user={currentUser} onLogin={handleLogin} onLogout={handleLogout} leads={leads} properties={properties} onUpdateLeadStatus={handleUpdateLeadStatus} onDeleteLead={handleDeleteLead} onDeleteProperty={handleDeleteProperty} onOpenNotesModal={setSelectedLeadForNotes} onOpenPropertyForm={() => { setEditingProperty(null); setPropertyFormOpen(true); }} onEditProperty={(prop) => { setEditingProperty(prop); setPropertyFormOpen(true); }} onDownloadCSV={downloadCSV} />;
             default: return <HomePage onAddLead={handleAddLead} />;
         }
     };
@@ -268,7 +268,7 @@ export default function App() {
             <CompareModal properties={propertiesToCompare} isOpen={isCompareModalOpen} onClose={() => setCompareModalOpen(false)} />
             
             <CompareBar properties={propertiesToCompare} onClear={clearComparison} onCompare={() => setCompareModalOpen(true)} />
-            <Toast message={toast.message} type={toast.type} visible={toast.visible} />
+            {toast.visible && <Toast message={toast.message} type={toast.type} />}
         </div>
     );
 }
