@@ -56,7 +56,7 @@ export default function App() {
             setAuthLoading(false);
         });
         
-        // Cargamos las propiedades, que son públicas, al iniciar la app.
+
         loadProperties();
 
         return () => {
@@ -100,7 +100,7 @@ export default function App() {
     const handleAddLead = async (leadData) => {
         try {
             const newLead = await addLead(leadData);
-            // Ya no actualizamos el estado local aquí, porque solo el admin puede ver los leads.
+           
             showToast('¡Gracias por tu interés! Nos pondremos en contacto pronto.');
         } catch (error) {
             console.error("Error adding lead:", error);
@@ -135,7 +135,7 @@ export default function App() {
     const saveNoteToLead = (leadId, noteText) => {
         const newNote = { text: noteText, date: new Date().toISOString() };
         let updatedLead;
-        // Esta función debería también actualizarse en Firestore, por ahora solo actualiza el estado local.
+
         setLeads(prevLeads => {
             const newLeads = prevLeads.map(lead => {
                 if (lead.id === leadId) {

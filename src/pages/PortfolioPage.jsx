@@ -26,7 +26,7 @@ export const PortfolioPage = ({ properties, onToggleCompare, onOpenModal, compar
             <div className="bg-white p-6 rounded-lg shadow-lg mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                 <input type="text" id="keyword" value={filters.keyword} onChange={handleFilterChange} placeholder="Buscar por palabra clave..." className="filter-input lg:col-span-2" />
                 <select id="type" value={filters.type} onChange={handleFilterChange} className="filter-input bg-white">
-                    <option value="all">Tipo (Todos)</option> <option value="venta">Venta</option> <option value="renta">Renta</option>
+                    <option value="all">Tipo (Todos)</option> <option value="venta">Venta</option> <option value="alquiler">Alquiler</option> <option value="inversion">Inversión</option>
                 </select>
                 <input type="number" id="maxPrice" value={filters.maxPrice} onChange={handleFilterChange} placeholder="Precio Máximo (USD)" className="filter-input" />
             </div>

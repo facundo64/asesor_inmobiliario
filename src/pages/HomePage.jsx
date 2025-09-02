@@ -1,13 +1,12 @@
 import React from 'react';
-// 1. IMPORTA TU VIDEO LOCAL DESDE LA CARPETA 'assets'
+
 import miVideoLocal from '../assets/Ciudad_Transitada_salta.mp4';
 
 export const HomePage = ({ onAddLead }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        // CORREGIDO: Eliminamos la creación de 'id' y 'date' aquí.
-        // Firestore se encargará de generar el ID y la fecha de creación.
+
         const newLead = {
             fullName: formData.get('fullName'),
             email: formData.get('email'),
