@@ -5,7 +5,20 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: 'var(--color-primary)',
+        secondary: 'var(--color-secondary)',
+        text: 'var(--color-text)',
+        light: 'var(--color-light)',
+        'accent-red': 'var(--color-accent-red)',
+      },
+      fontFamily: {
+        'sans': ['Inter', 'sans-serif'],
+        'serif': ['Cormorant Garamond', 'serif'],
+      }
+    },
   },
   plugins: [],
 }
+

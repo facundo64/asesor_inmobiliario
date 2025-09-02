@@ -30,7 +30,7 @@ export default function App() {
     const [authLoading, setAuthLoading] = useState(true);
     
     const [currentPage, setCurrentPage] = useState('home');
-    const [toast, setToast] = useState({ message: '', type: 'success', visible: false });
+    const [toast, setToast] = useState({ message: '', type: '', visible: false });
     const [selectedProperty, setSelectedProperty] = useState(null);
     const [editingProperty, setEditingProperty] = useState(null);
     const [isPropertyFormOpen, setPropertyFormOpen] = useState(false);
@@ -39,32 +39,19 @@ export default function App() {
     const [isCompareModalOpen, setCompareModalOpen] = useState(false);
 
     useEffect(() => {
-        const fontAwesomeLink = document.createElement('link');
-        fontAwesomeLink.rel = 'stylesheet';
-        fontAwesomeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
-        document.head.appendChild(fontAwesomeLink);
-
         const unsubscribe = onAuthStateChanged(auth, user => {
             setCurrentUser(user);
             if (user) {
-                // Si el usuario inicia sesión, cargamos los leads.
                 loadLeads();
             } else {
-                // Si el usuario cierra sesión, limpiamos los leads para seguridad.
                 setLeads([]);
             }
             setAuthLoading(false);
         });
         
-
         loadProperties();
 
-        return () => {
-            if (document.head.contains(fontAwesomeLink)) {
-                document.head.removeChild(fontAwesomeLink);
-            }
-            unsubscribe();
-        };
+        return () => unsubscribe();
     }, []);
     
     const loadLeads = async () => {
@@ -94,30 +81,25 @@ export default function App() {
 
     const navigate = (page) => {
         setCurrentPage(page);
-        window.history.pushState(null, '', `#${page}`);
     };
 
     const handleAddLead = async (leadData) => {
         try {
-            const newLead = await addLead(leadData);
-           
-            showToast('¡Gracias por tu interés! Nos pondremos en contacto pronto.');
+            await addLead(leadData);
+            showToast('¡Gracias! Su mensaje ha sido enviado.', 'success');
         } catch (error) {
             console.error("Error adding lead:", error);
-            showToast('Error al guardar los datos', 'error');
+            showToast('Error al enviar el mensaje', 'error');
         }
     };
 
     const handleUpdateLeadStatus = async (id, status) => {
         try {
             await updateLeadStatus(id, status);
-            setLeads(prev => prev.map(lead => 
-                lead.id === id ? { ...lead, status } : lead
-            ));
-            showToast('Estado actualizado correctamente');
+            setLeads(prev => prev.map(lead => lead.id === id ? { ...lead, status } : lead));
+            showToast('Estado actualizado');
         } catch (error) {
-            console.error("Error updating lead status:", error);
-            showToast('Error al actualizar el estado', 'error');
+            showToast('Error al actualizar', 'error');
         }
     };
 
@@ -127,148 +109,101 @@ export default function App() {
             setLeads(prev => prev.filter(lead => lead.id !== id));
             showToast('Cliente eliminado.');
         } catch (error) {
-            console.error("Error deleting lead:", error);
-            showToast('Error al eliminar el cliente', 'error');
+            showToast('Error al eliminar', 'error');
         }
     };
     
     const saveNoteToLead = (leadId, noteText) => {
-        const newNote = { text: noteText, date: new Date().toISOString() };
-        let updatedLead;
-
-        setLeads(prevLeads => {
-            const newLeads = prevLeads.map(lead => {
-                if (lead.id === leadId) {
-                    updatedLead = { ...lead, notes: [...(lead.notes || []), newNote] };
-                    return updatedLead;
-                }
-                return lead;
-            });
-            return newLeads;
-        });
-        setSelectedLeadForNotes(updatedLead);
-        showToast('Nota guardada (localmente).');
+        console.log("Saving note (locally for now):", leadId, noteText);
     };
-
-    const readFileAsDataURL = (file) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    };
-
+    const readFileAsDataURL = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
     const saveProperty = async (formData, imageFiles, brochureFile) => {
         try {
             let finalData = { ...formData };
-
-            if (imageFiles && imageFiles.length > 0) {
-                const imagePromises = Array.from(imageFiles).map(file => readFileAsDataURL(file));
-                finalData.images = await Promise.all(imagePromises);
+            if (imageFiles?.length > 0) {
+                finalData.images = await Promise.all(Array.from(imageFiles).map(readFileAsDataURL));
             }
-
             if (brochureFile) {
                 finalData.brochure = await readFileAsDataURL(brochureFile);
             }
-
             if (finalData.id) {
-                await updateProperty(finalData.id, finalData);
-                setProperties(prev => prev.map(p => p.id === finalData.id ? finalData : p));
+                const updated = await updateProperty(finalData.id, finalData);
+                setProperties(prev => prev.map(p => p.id === updated.id ? updated : p));
             } else {
-                const newProperty = await addProperty(finalData);
-                setProperties(prev => [newProperty, ...prev]);
+                const newProp = await addProperty(finalData);
+                setProperties(prev => [newProp, ...prev]);
             }
-            
-            showToast(`Propiedad ${finalData.id ? 'actualizada' : 'agregada'} con éxito.`);
+            showToast(`Propiedad ${finalData.id ? 'actualizada' : 'agregada'}.`);
             setPropertyFormOpen(false);
             setEditingProperty(null);
         } catch (error) {
-            console.error("Error saving property:", error);
-            showToast('Error al guardar la propiedad', 'error');
+            showToast('Error al guardar propiedad', 'error');
         }
     };
-
     const handleDeleteProperty = async (id) => { 
         try {
             await deletePropertyService(id);
             setProperties(prev => prev.filter(p => p.id !== id)); 
             showToast('Propiedad eliminada.');
         } catch(error) {
-            console.error("Error deleting property:", error);
-            showToast('Error al eliminar la propiedad', 'error');
+            showToast('Error al eliminar propiedad', 'error');
         }
     };
-    
     const handleLogin = async (email, password) => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            showToast('Inicio de sesión exitoso.');
         } catch (error) {
             showToast('Credenciales incorrectas.', 'error');
-            console.error("Error de inicio de sesión:", error);
         }
     };
-
     const handleLogout = async () => {
-        try {
-            await signOut(auth);
-            showToast('Sesión cerrada correctamente.');
-        } catch (error) {
-            showToast('Error al cerrar sesión.', 'error');
-        }
+        await signOut(auth);
     };
-    
     const downloadCSV = () => {
         const csv = Papa.unparse(leads);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'clientes_potenciales.csv';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'clientes_potenciales.csv';
+        link.click();
+        URL.revokeObjectURL(link.href);
     };
-
-    const toggleCompare = (propertyId) => {
-        setComparisonList(prev => {
-            if (prev.includes(propertyId)) return prev.filter(id => id !== propertyId);
-            if (prev.length < 3) return [...prev, propertyId];
-            showToast('Puedes comparar hasta 3 propiedades.', 'error');
-            return prev;
-        });
-    };
-
+    const toggleCompare = (id) => setComparisonList(p => p.includes(id) ? p.filter(i => i !== id) : (p.length < 3 ? [...p, id] : p));
     const clearComparison = () => setComparisonList([]);
     const propertiesToCompare = properties.filter(p => comparisonList.includes(p.id));
 
+
     const renderPage = () => {
-        if (authLoading) {
-            return <div className="text-center p-10">Cargando...</div>;
+        if (authLoading && currentPage !== 'home') {
+             return <div className="text-center p-10 text-light">Cargando...</div>;
         }
         switch (currentPage) {
-            case 'portfolio': return <PortfolioPage properties={properties} onToggleCompare={toggleCompare} onOpenModal={setSelectedProperty} comparisonList={comparisonList} />;
-            case 'admin': return <AdminPage user={currentUser} onLogin={handleLogin} onLogout={handleLogout} leads={leads} properties={properties} onUpdateLeadStatus={handleUpdateLeadStatus} onDeleteLead={handleDeleteLead} onDeleteProperty={handleDeleteProperty} onOpenNotesModal={setSelectedLeadForNotes} onOpenPropertyForm={() => { setEditingProperty(null); setPropertyFormOpen(true); }} onEditProperty={(prop) => { setEditingProperty(prop); setPropertyFormOpen(true); }} onDownloadCSV={downloadCSV} />;
-            default: return <HomePage onAddLead={handleAddLead} />;
+            case 'portfolio': 
+                return <PortfolioPage properties={properties} onToggleCompare={toggleCompare} onOpenModal={setSelectedProperty} comparisonList={comparisonList} />;
+            case 'admin': 
+                return <AdminPage user={currentUser} onLogin={handleLogin} onLogout={handleLogout} leads={leads} properties={properties} onUpdateLeadStatus={handleUpdateLeadStatus} onDeleteLead={handleDeleteLead} onDeleteProperty={handleDeleteProperty} onOpenNotesModal={setSelectedLeadForNotes} onOpenPropertyForm={() => { setEditingProperty(null); setPropertyFormOpen(true); }} onEditProperty={(prop) => { setEditingProperty(prop); setPropertyFormOpen(true); }} onDownloadCSV={downloadCSV} />;
+            default: 
+                return <HomePage navigate={navigate} onAddLead={handleAddLead} />;
         }
     };
 
     return (
-        <div className="text-dark">
-            <Header currentPage={currentPage} navigate={navigate} />
-            <main className="container mx-auto px-4 md:px-6 py-4 md:py-8">
-                {renderPage()}
-            </main>
-            
+        <>
+            <Header navigate={navigate} currentPage={currentPage} />
+            <main>{renderPage()}</main>
+
             <PropertyModal property={selectedProperty} onClose={() => setSelectedProperty(null)} />
             <NotesModal lead={selectedLeadForNotes} onClose={() => setSelectedLeadForNotes(null)} onSaveNote={saveNoteToLead} />
             <PropertyFormModal isOpen={isPropertyFormOpen} onClose={() => { setPropertyFormOpen(false); setEditingProperty(null); }} onSave={saveProperty} propertyToEdit={editingProperty} />
             <CompareModal properties={propertiesToCompare} isOpen={isCompareModalOpen} onClose={() => setCompareModalOpen(false)} />
             
-            <CompareBar properties={propertiesToCompare} onClear={clearComparison} onCompare={() => setCompareModalOpen(true)} />
+            {currentPage === 'portfolio' && <CompareBar properties={propertiesToCompare} onClear={clearComparison} onCompare={() => setCompareModalOpen(true)} />}
             {toast.visible && <Toast message={toast.message} type={toast.type} />}
-        </div>
+        </>
     );
 }

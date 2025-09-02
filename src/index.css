@@ -1,90 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Inter:wght@400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
 :root {
-    --color-primary: #C8102E; 
-    --color-secondary: #4A4A4A; 
-    --color-accent: #9B9BBB;  
-    --color-dark: #333333;   
-    --color-white: #FFFFFF;   
-    --color-bg: #F8F9FA;     
-    --color-investment: #D4AF37; 
+    --color-primary: #D4AF37; /* Dorado */
+    --color-secondary: #121212; /* Negro profundo */
+    --color-text: #C7C7C7;
+    --color-light: #F3F3F3;
+    --color-accent-red: #C8102E; 
 }
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--color-bg);
-    color: var(--color-dark);
+
+html {
     scroll-behavior: smooth;
 }
-.bg-primary { background-color: var(--color-primary); }
-.text-primary { color: var(--color-primary); }
-.border-primary { border-color: var(--color-primary); }
-.bg-secondary { background-color: var(--color-secondary); }
-.text-secondary { color: var(--color-secondary); }
-.bg-accent { background-color: var(--color-accent); }
 
-.btn { 
-    padding: 0.5rem 1rem;
-    border-radius: 0.375rem;
-    font-weight: 600;
-    transition: all 0.3s ease; 
-}
-.btn-primary { background-color: var(--color-primary); color: var(--color-white); }
-.btn-primary:hover { background-color: #A00D25; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-.btn-secondary { background-color: var(--color-secondary); color: var(--color-white); }
-.btn-secondary:hover { background-color: #333333; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-
-.nav-link { position: relative; transition: color 0.3s ease; }
-.nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 50%; transform: translateX(-50%); background-color: var(--color-primary); transition: width 0.3s ease; }
-.nav-link:hover::after, .nav-link.active::after { width: 100%; }
-
-.carousel-container { position: relative; overflow: hidden; }
-.carousel-slide { display: none; transition: opacity 1s ease-in-out; }
-.carousel-slide.active { display: block; }
-.carousel-image { width: 100%; height: 450px; object-fit: cover; }
-.carousel-dots { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
-.carousel-dot { width: 12px; height: 12px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.6); cursor: pointer; transition: background-color 0.3s; }
-.carousel-dot.active { background-color: var(--color-primary); }
-
-.status-dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-
-.filter-input { border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.75rem 1rem; transition: border-color 0.3s, box-shadow 0.3s; }
-.filter-input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(200, 16, 46, 0.2); }
-
-.investment-badge { position: absolute; top: 1rem; left: 1rem; background-color: var(--color-investment); color: white; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 0.25rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-
-.compare-item-img { width: 50px; height: 50px; object-fit: cover; border-radius: 0.25rem; };
-
-/* Ajustes responsivos */
-@media (max-width: 640px) {
-    .btn {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.875rem;
-    }
-
-    .carousel-image {
-        height: 300px;
-    }
-
-    .carousel-dots {
-        bottom: 8px;
-    }
-
-    .carousel-dot {
-        width: 8px;
-        height: 8px;
-    }
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    overflow-x: hidden;
 }
 
-/* Mejora el manejo de texto en dispositivos móviles */
-@media (max-width: 480px) {
-    body {
-        font-size: 14px;
-    }
+.font-serif { 
+    font-family: 'Cormorant Garamond', serif; 
+}
 
-    h1, h2, h3 {
-        word-wrap: break-word;
-    }
+.form-input {
+    @apply w-full p-4 rounded-lg bg-secondary border border-gray-700 text-light focus:outline-none focus:ring-2 focus:ring-primary transition-all;
+}
+
+.red-dynamic-button {
+    @apply bg-accent-red text-white transition-all duration-300 ease-out shadow-lg;
+    box-shadow: 0 4px 15px rgba(200, 16, 46, 0.2);
+}
+.red-dynamic-button:hover {
+    @apply bg-red-800 scale-105;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(200, 16, 46, 0.4);
+}
+
+/* --- Estilos para la Intro --- */
+#intro-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--color-secondary);
+    z-index: 100;
+    transition: opacity 2s cubic-bezier(0.83, 0, 0.17, 1);
+}
+#intro-logo {
+    position: fixed;
+    z-index: 101;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 8rem;
+    color: var(--color-light);
+    transition: all 2s cubic-bezier(0.83, 0, 0.17, 1);
+}
+#intro-logo span {
+    display: block;
+    opacity: 0;
+    transition: all 1s cubic-bezier(0.83, 0, 0.17, 1);
+}
+#intro-logo #intro-R {
+    transform: translateX(-60px);
+}
+#intro-logo #intro-A {
+    transform: translateX(60px);
+}
+
+.main-content-home, .main-header {
+    opacity: 0;
+    transition: opacity 1.8s ease-in-out;
+}
+.main-content-home.is-visible, .main-header.is-visible {
+    opacity: 1;
+}
+
+#hero-content > * {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 1.2s cubic-bezier(0.165, 0.84, 0.44, 1), transform 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* --- Estilos para el Scroll Horizontal --- */
+.horizontal-scroll-section {
+    height: 300vh;
+    position: relative;
+}
+.scroll-container {
+    height: 100vh;
+    width: 100vw;
+    position: sticky;
+    top: 0;
+    overflow: hidden;
+}
+.scroll-track {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    width: 400vw; /* 4 slides */
+    will-change: transform;
+}
+.slide {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10vw;
+    flex-shrink: 0;
+}
+.slide img {
+    max-height: 60vh;
+    width: auto;
+    object-fit: cover;
+}
+
+/* --- Estilos Generales y de Revelación --- */
+.reveal-element {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.reveal-element.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* --- Estilos para el Portafolio y Tarjetas --- */
+.property-card-deluxe {
+    background-color: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    transition: all 0.3s ease;
+}
+.property-card-deluxe:hover {
+    transform: translateY(-5px);
+    border-color: var(--color-primary);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
