@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import * as THREE from 'three'; // Asegúrate de instalar three.js: npm install three
-import { FaChevronDown, FaPhone, FaEnvelope } from 'react-icons/fa'; // Instala react-icons si no lo has hecho
+import * as THREE from 'three'; 
+import { FaChevronDown, FaPhone, FaEnvelope } from 'react-icons/fa'; 
 
 export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) => {
     const introRan = useRef(false);
@@ -16,8 +16,8 @@ export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) =
 
         const introOverlay = document.getElementById('intro-overlay');
         const introLogo = document.getElementById('intro-logo');
-        const introR = document.getElementById('intro-R');
-        const introA = document.getElementById('intro-A');
+        const introR1 = document.getElementById('intro-R1');
+        const introR2 = document.getElementById('intro-R2');
         const finalLogoTarget = document.getElementById('final-logo-target');
         const mainHeader = document.querySelector('.main-header');
         const mainContent = document.querySelector('.main-content-home');
@@ -34,10 +34,10 @@ export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) =
 
         // Anima las letras del logo
         setTimeout(() => {
-            if (introR) introR.style.transform = 'translateX(0)';
-            if (introR) introR.style.opacity = '1';
-            if (introA) introA.style.transform = 'translateX(0)';
-            if (introA) introA.style.opacity = '1';
+            if (introR1) introR1.style.transform = 'translateX(0)';
+            if (introR1) introR1.style.opacity = '1';
+            if (introR2) introR2.style.transform = 'translateX(0)';
+            if (introR2) introR2.style.opacity = '1';
         }, 100);
 
         // Mueve el logo al header
@@ -208,7 +208,7 @@ export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) =
             {/* Elementos de Intro */}
             <div id="intro-overlay"></div>
             <div id="intro-logo">
-                <span id="intro-R">R</span><span id="intro-A">A.</span>
+                <span id="intro-R1">R</span><span id="intro-R2">R.</span>
             </div>
             
             {/* Contenido Principal */}
@@ -353,7 +353,7 @@ export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) =
                                         </div>
                                         <div className="ml-4">
                                             <p className="text-sm text-gray-500">Llamada Directa</p>
-                                            <a href="tel:+5491112345678" className="text-light font-semibold hover:text-primary transition-colors">+54 9 11 1234 5678</a>
+                                            <a href="tel:+5491112345678" className="text-light font-semibold hover:text-primary transition-colors">+54 9 387 547 2525</a>
                                         </div>
                                     </div>
                                     <div className="flex items-center justify-center lg:justify-start">
@@ -362,7 +362,7 @@ export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) =
                                         </div>
                                         <div className="ml-4">
                                             <p className="text-sm text-gray-500">Correo Electrónico</p>
-                                            <a href="mailto:contacto@rodrigoasesor.com" className="text-light font-semibold hover:text-primary transition-colors">contacto@rodrigoasesor.com</a>
+                                            <a href="mailto:contacto@rodrigoasesor.com" className="text-light font-semibold hover:text-primary transition-colors">rodrigo.rasgido@kwargentina.com</a>
                                         </div>
                                     </div>
                                 </div>

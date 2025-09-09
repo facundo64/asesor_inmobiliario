@@ -4,10 +4,10 @@ export const CompareModal = ({ isOpen, onClose, properties = [] }) => {
     // Verificar si no hay propiedades o si isOpen es false
     if (!isOpen || !properties || properties.length === 0) return null;
 
-    // Obtener todas las características únicas para comparar
+   
     const allFeatures = ['price', 'location', 'type', 'size', 'bedrooms', 'bathrooms', 'status'];
     
-    // Nombres legibles para las características
+
     const featureNames = {
         price: 'Precio',
         location: 'Ubicación',

@@ -25,7 +25,7 @@ export const Header = ({ navigate, currentPage, isIntroAnimating, finalLogoRef }
                     onClick={() => handleNavigate('home')} 
                     className="text-2xl font-serif font-bold text-light"
                 >
-                    RA.
+                    RR.
                 </button>
                 
                 <div className="hidden md:flex items-center space-x-8 text-sm">

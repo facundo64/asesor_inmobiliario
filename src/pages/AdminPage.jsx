@@ -15,7 +15,7 @@ export const AdminPage = ({
     onOpenNotesModal, 
     onDownloadCSV,
     navigate,
-    onSaveProperty, // Esta es la función importante que recibe desde App.jsx
+    onSaveProperty, 
     onSaveNotes
 }) => {
     // Estados para el formulario de login
@@ -59,9 +59,9 @@ export const AdminPage = ({
         setShowPropertyForm(true);
     };
 
-    // Modificamos esta función para que use directamente onSaveProperty
+
     const handleSaveProperty = (formData, imageFiles, brochureFile) => {
-        // Llamar directamente a la función de App.jsx que maneja Firebase
+
         onSaveProperty(formData, imageFiles, brochureFile);
         setShowPropertyForm(false);
     };
@@ -398,7 +398,7 @@ export const AdminPage = ({
                 <PropertyFormModal 
                     isOpen={showPropertyForm} 
                     onClose={() => setShowPropertyForm(false)} 
-                    onSave={handleSaveProperty}  // Usa la función que llama a onSaveProperty
+                    onSave={handleSaveProperty}  
                     propertyToEdit={propertyToEdit}
                 />
             )}

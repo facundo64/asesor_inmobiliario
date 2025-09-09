@@ -370,12 +370,12 @@ export default function App() {
                         onUpdateLeadStatus={handleUpdateLeadStatus}
                         onDeleteLead={handleDeleteLead}
                         onDeleteProperty={handleDeleteProperty}
-                        onOpenPropertyForm={() => {}} // Ya no es necesario, manejaremos esto en AdminPage
-    onEditProperty={() => {}} // Ya no es necesario, manejaremos esto en AdminPage
+                        onOpenPropertyForm={() => {}} 
+    onEditProperty={() => {}} 
                         onOpenNotesModal={setSelectedLeadForNotes} 
                         onDownloadCSV={downloadCSV} 
                         navigate={navigate}
-                        onSaveProperty={saveProperty} // Esta es la función clave que hace el guardado real
+                        onSaveProperty={saveProperty} 
                         onSaveNotes={saveNoteToLead}
                     />
                 )}

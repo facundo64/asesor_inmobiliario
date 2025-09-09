@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
-export const NotesModal = ({ lead, onClose, onSaveNote }) => {  // Cambiado de onSave a onSaveNote
+export const NotesModal = ({ lead, onClose, onSaveNote }) => {  
     const [newNote, setNewNote] = useState('');
     const [notes, setNotes] = useState([]);
 
     useEffect(() => {
-        // Cargar notas existentes cuando cambia el lead
+        
         if (lead && lead.notes) {
             setNotes(lead.notes);
         } else {
@@ -26,7 +26,7 @@ export const NotesModal = ({ lead, onClose, onSaveNote }) => {  // Cambiado de o
         const updatedNotes = [...notes, noteToAdd];
         
         // Guardar usando la función proporcionada como prop
-        if (onSaveNote && lead) {  // Cambiado de onSave a onSaveNote
+        if (onSaveNote && lead) {  
             onSaveNote(lead.id, updatedNotes);
             setNewNote(''); // Limpiar el campo después de guardar
         }

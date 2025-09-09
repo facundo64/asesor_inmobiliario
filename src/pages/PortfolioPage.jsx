@@ -103,7 +103,7 @@ export const PortfolioPage = ({ properties = [], onOpenProperty, onToggleCompare
                 properties={compareList} 
                 onCompare={onOpenCompare} 
                 onClear={() => {
-                    // Asume que hay un método en App.jsx para limpiar la lista de comparación
+                 
                     const clearEvent = new CustomEvent('clearComparison');
                     window.dispatchEvent(clearEvent);
                 }}

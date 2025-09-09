@@ -117,7 +117,7 @@
 
 /* --- Estilos para el Scroll Horizontal --- */
 .horizontal-scroll-container { 
-    height: 300vh; /* Altura de 3 pantallas para dar espacio al scroll */
+    height: 300vh; 
     position: relative;
 }
 
@@ -137,10 +137,10 @@
 }
 .scroll-track > div { 
     flex-shrink: 0;
-    width: 100vw; /* Cada panel ocupa todo el ancho de la ventana */
+    width: 100vw; 
 }
 
-/* Estilos para animación del logo */
+
 #intro-logo #intro-R { 
     transform: translateX(-60px); 
 }
