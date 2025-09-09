@@ -23,6 +23,7 @@ export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) =
         const mainContent = document.querySelector('.main-content-home');
         const heroContent = document.getElementById('hero-content');
         
+        //comprobacion de errores
         if (!introOverlay || !introLogo || !mainHeader || !mainContent || !finalLogoTarget) {
             console.error("Elementos necesarios para la animación de intro no encontrados");
             onIntroFinish();
@@ -235,8 +236,8 @@ export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) =
                         <div className="absolute inset-0 bg-black opacity-60"></div>
                     </div>
                     <div id="hero-content" className="relative z-20 p-6">
-                        <h1 className="font-serif text-6xl md:text-8xl font-bold leading-tight">El Arte de Invertir.</h1>
-                        <p className="mt-4 text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto">Donde la estrategia de precisión construye legados.</p>
+                        <h1 className="font-serif text-6xl md:text-8xl font-bold leading-tight">Tu futuro empieza aqui.</h1>
+                        <p className="mt-4 text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto">Te acompaño con el respaldo de la red inmobiliaria mas grande del mundo.</p>
                     </div>
                     <div className="absolute bottom-10 z-20 animate-bounce">
                         <a href="#proceso" className="text-light text-xl">
@@ -252,8 +253,8 @@ export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) =
                             {/* Panel 1: Introducción */}
                             <div className="w-screen h-screen flex items-center justify-center text-center">
                                 <div className="reveal-element">
-                                    <h2 className="text-5xl font-serif font-bold text-light">Un Proceso.<br />Un Viaje a la Excelencia.</h2>
-                                    <p className="mt-4 text-gray-400">Desliza para descubrir cómo transformo el mercado en tu oportunidad.</p>
+                                    <h2 className="text-5xl font-serif font-bold text-light">El éxito de tu búsqueda<br />Comienza aqui.</h2>
+                                    <p className="mt-4 text-gray-400">Un proceso profesional y personalizado para convertir tus metas inmobiliarias en realidad.</p>
                                 </div>
                             </div>
                             
@@ -262,11 +263,11 @@ export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) =
                                 <div className="container mx-auto px-6 grid md:grid-cols-2 items-center gap-12">
                                     <div className="text-center md:text-left">
                                         <p className="text-7xl font-serif font-bold text-primary opacity-50">01</p>
-                                        <h3 className="text-4xl font-serif font-bold text-light mt-2">Diagnóstico y Estrategia</h3>
-                                        <p className="mt-4 text-gray-400">Aquí comienza todo. No buscamos propiedades, definimos tu futuro financiero. Analizamos tus metas para crear un mapa de inversión a medida.</p>
+                                        <h3 className="text-4xl font-serif font-bold text-light mt-2">Tu visión nuestro plan</h3>
+                                        <p className="mt-4 text-gray-400">Analizaremos tus metas y requerimientos para crear un plan de busqueda y un mapa de acción completamente a tu medida.</p>
                                     </div>
                                     <img 
-                                        src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
+                                        src="https://images.pexels.com/photos/7641854/pexels-photo-7641854.jpeg" 
                                         alt="Estrategia" 
                                         className="rounded-lg shadow-2xl h-96 w-full object-cover"
                                     />
@@ -277,14 +278,14 @@ export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) =
                             <div className="w-screen h-screen flex items-center">
                                 <div className="container mx-auto px-6 grid md:grid-cols-2 items-center gap-12">
                                     <img 
-                                        src="https://images.pexels.com/photos/1181298/pexels-photo-1181298.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
+                                        src="https://images.pexels.com/photos/271667/pexels-photo-271667.jpeg" 
                                         alt="Curaduría" 
                                         className="rounded-lg shadow-2xl h-96 w-full object-cover order-last md:order-first"
                                     />
                                     <div className="text-center md:text-left">
                                         <p className="text-7xl font-serif font-bold text-primary opacity-50">02</p>
-                                        <h3 className="text-4xl font-serif font-bold text-light mt-2">Curaduría de Activos</h3>
-                                        <p className="mt-4 text-gray-400">El mercado es ruido. Yo encuentro la señal. Con acceso a propiedades off-market, te presento solo las joyas que superan mis estrictos criterios.</p>
+                                        <h3 className="text-4xl font-serif font-bold text-light mt-2">Busqueda y seleccion inteligente</h3>
+                                        <p className="mt-4 text-gray-400">Utilizó la tecnología de Keller Willians y  mi red de contactos para identificar propiedades que se ajusten perfectamente a tu perfil.</p>
                                     </div>
                                 </div>
                             </div>
@@ -294,11 +295,11 @@ export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) =
                                 <div className="container mx-auto px-6 grid md:grid-cols-2 items-center gap-12">
                                     <div className="text-center md:text-left">
                                         <p className="text-7xl font-serif font-bold text-primary opacity-50">03</p>
-                                        <h3 className="text-4xl font-serif font-bold text-light mt-2">Cierre y Gestión de Legado</h3>
-                                        <p className="mt-4 text-gray-400">La negociación es un arte. Me encargo de cada detalle para asegurar una transacción impecable, sentando las bases de tu futuro patrimonio.</p>
+                                        <h3 className="text-4xl font-serif font-bold text-light mt-2">Tu inversión en las mejores manos</h3>
+                                        <p className="mt-4 text-gray-400">Te represento para obtener las mejores condiciones de compra, garantizando una transacción segura, profesional y sin sorpresas.</p>
                                     </div>
                                     <img 
-                                        src="https://images.pexels.com/photos/5668858/pexels-photo-5668858.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
+                                        src="https://images.pexels.com/photos/8112121/pexels-photo-8112121.jpeg" 
                                         alt="Cierre de trato" 
                                         className="rounded-lg shadow-2xl h-96 w-full object-cover"
                                     />
@@ -313,7 +314,7 @@ export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) =
                     <div className="container mx-auto px-6">
                         <div className="grid md:grid-cols-2 gap-16 items-center">
                             <div className="reveal-element">
-                                <h2 className="text-5xl font-serif font-bold text-light">Arquitectura de Inversión</h2>
+                                <h2 className="text-5xl font-serif font-bold text-light">Explora las mejores oportunidades del mercado</h2>
                                 <p className="mt-6 text-gray-400 leading-relaxed">
                                     Más que propiedades, construimos portafolios. Cada activo es seleccionado por su potencial arquitectónico y financiero, 
                                     creando una colección de inversiones tan sólida como estéticamente impactante. Visualice el futuro de su capital.
@@ -341,10 +342,9 @@ export const HomePage = ({ navigate, onAddLead, onIntroFinish, finalLogoRef }) =
                         <div className="grid lg:grid-cols-2 gap-16 items-center">
                             {/* Columna Izquierda: Info Personal */}
                             <div className="reveal-element text-center lg:text-left">
-                                <h2 className="text-5xl font-serif font-bold text-light">Hablemos de su Próxima Inversión</h2>
+                                <h2 className="text-5xl font-serif font-bold text-light">Empecemos a hacer realidad tus metas</h2>
                                 <p className="mt-6 text-gray-400 leading-relaxed">
-                                    Su visión merece un estratega, no solo un agente. Estoy aquí para ofrecerle un nivel de servicio 
-                                    y análisis que transformará sus objetivos en realidad. La primera conversación es el paso más importante.
+                                    La primera conversación es el paso más importante para definir una estrategia y transformar tus objetivos inmobiliarios en realidad.
                                 </p>
                                 <div className="mt-10 border-t border-gray-800 pt-8 space-y-6">
                                     <div className="flex items-center justify-center lg:justify-start">
