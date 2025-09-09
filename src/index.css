@@ -5,40 +5,69 @@
 @tailwind utilities;
 
 :root {
-    --color-primary: #D4AF37; /* Dorado */
-    --color-secondary: #121212; /* Negro profundo */
-    --color-text: #C7C7C7;
-    --color-light: #F3F3F3;
-    --color-accent-red: #C8102E; 
+  /* Colores principales */
+  --color-primary: #D4AF37; /* Dorado elegante */
+  --color-secondary: #1E3A5F; /* Azul marino profesional */
+  --color-light: #FFFFFF;
+  
+  /* Nuevos tonos para transmitir tranquilidad */
+  --color-bg-soft: #F5F7FA; /* Fondo claro para áreas principales */
+  --color-bg-accent: #E9EEF6; /* Fondo para tarjetas y elementos */
+  
+  /* Escala de azules para confianza */
+  --color-blue-900: #0F2847;
+  --color-blue-800: #1E3A5F;
+  --color-blue-700: #2D4D76;
+  --color-blue-600: #3C608D;
+  --color-blue-500: #4B73A3;
+  --color-blue-400: #6389B3;
+  --color-blue-300: #7FA0C4;
+  --color-blue-200: #A6BCD7;
+  --color-blue-100: #CDD8E9;
+  --color-blue-50: #E9EEF6;
+  
+  /* Escala de grises cálidos */
+  --color-gray-900: #2C3A47;
+  --color-gray-800: #3E4C59;
+  --color-gray-700: #576574;
+  --color-gray-600: #8395A7;
+  --color-gray-500: #95A5A6;
+  --color-gray-400: #BDC3C7;
+  --color-gray-300: #DAE0E5;
+  --color-gray-200: #E9EBEE;
+  --color-gray-100: #F1F2F4;
 }
 
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--color-secondary);
-    color: var(--color-text);
-    overflow-x: hidden;
-}
-
-.font-serif { 
-    font-family: 'Cormorant Garamond', serif; 
-}
-
-.form-input {
-    @apply w-full p-4 rounded-lg bg-secondary border border-gray-700 text-light focus:outline-none focus:ring-2 focus:ring-primary transition-all;
-}
-
+/* Botón dinámico con efecto de brillo dorado */
 .red-dynamic-button {
-    @apply bg-accent-red text-white transition-all duration-300 ease-out shadow-lg;
-    box-shadow: 0 4px 15px rgba(200, 16, 46, 0.2);
+  background: linear-gradient(to right, #D4AF37, #F5D76E, #D4AF37);
+  background-size: 200% 100%;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
+
 .red-dynamic-button:hover {
-    @apply bg-red-800 scale-105;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(200, 16, 46, 0.4);
+  background-position: right center;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
+
+.red-dynamic-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: transform 0.5s, opacity 0.5s;
+}
+
+.red-dynamic-button:hover::after {
+  opacity: 1;
+  transform: scale(1);
 }
 
 /* --- Estilos para la Intro --- */
@@ -46,38 +75,37 @@ body {
     position: fixed;
     inset: 0;
     background-color: var(--color-secondary);
-    z-index: 100;
-    transition: opacity 2s cubic-bezier(0.83, 0, 0.17, 1);
+    z-index: 100; /* Por encima de todo */
+    transition: opacity 1.5s ease-in-out 1.5s; /* Se desvanece después de un retraso */
 }
+
 #intro-logo {
     position: fixed;
-    z-index: 101;
+    z-index: 101; /* Por encima del overlay */
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
+    align-items: center;
+    justify-content: center;
     font-family: 'Cormorant Garamond', serif;
     font-size: 8rem;
     color: var(--color-light);
-    transition: all 2s cubic-bezier(0.83, 0, 0.17, 1);
-}
-#intro-logo span {
-    display: block;
-    opacity: 0;
-    transition: all 1s cubic-bezier(0.83, 0, 0.17, 1);
-}
-#intro-logo #intro-R {
-    transform: translateX(-60px);
-}
-#intro-logo #intro-A {
-    transform: translateX(60px);
+    /* Transición para todos los cambios: posición, tamaño, etc. */
+    transition: all 1.2s cubic-bezier(0.77, 0, 0.175, 1);
 }
 
-.main-content-home, .main-header {
+#intro-logo span {
     opacity: 0;
-    transition: opacity 1.8s ease-in-out;
+    transition: opacity 1s ease;
 }
-.main-content-home.is-visible, .main-header.is-visible {
+
+.main-content-home {
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out 1.8s; /* Aparece con un retraso */
+}
+
+.main-content-home.is-visible {
     opacity: 1;
 }
 
@@ -88,37 +116,49 @@ body {
 }
 
 /* --- Estilos para el Scroll Horizontal --- */
-.horizontal-scroll-section {
-    height: 300vh;
+.horizontal-scroll-container { 
+    height: 300vh; /* Altura de 3 pantallas para dar espacio al scroll */
     position: relative;
 }
-.scroll-container {
-    height: 100vh;
-    width: 100vw;
+
+.sticky-container { 
     position: sticky;
-    top: 0;
+    top: 0; 
+    height: 100vh;
+    width: 100%;
     overflow: hidden;
 }
-.scroll-track {
+
+.scroll-track { 
     height: 100%;
     display: flex;
     align-items: center;
-    width: 400vw; /* 4 slides */
-    will-change: transform;
+    will-change: transform; /* Optimización de rendimiento */
 }
-.slide {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 10vw;
+.scroll-track > div { 
     flex-shrink: 0;
+    width: 100vw; /* Cada panel ocupa todo el ancho de la ventana */
 }
-.slide img {
-    max-height: 60vh;
-    width: auto;
-    object-fit: cover;
+
+/* Estilos para animación del logo */
+#intro-logo #intro-R { 
+    transform: translateX(-60px); 
+}
+#intro-logo #intro-A { 
+    transform: translateX(60px); 
+}
+
+/* Estilos para el header */
+.main-header { 
+    opacity: 0; 
+    transition: opacity 1.8s ease-in-out; 
+}
+
+/* Estilos para el contenedor 3D */
+#three-canvas-container { 
+    cursor: grab; 
+    min-height: 500px; 
+    height: 100%; 
 }
 
 /* --- Estilos Generales y de Revelación --- */
@@ -142,4 +182,26 @@ body {
     transform: translateY(-5px);
     border-color: var(--color-primary);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* Estilos para los modales */
+.modal-container {
+  background-color: var(--color-gray-900);
+  border: 1px solid var(--color-gray-800);
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--color-gray-800);
+  padding: 1.5rem;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--color-gray-800);
+  padding: 1.5rem;
 }

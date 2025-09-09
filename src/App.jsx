@@ -1,27 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Papa from 'papaparse';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth } from './firebase';
-import { HomePage } from './pages/HomePage.jsx';
+import { auth, db } from './firebase';
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { HomePage } from './pages/HomePage';
 import { PortfolioPage } from './pages/PortfolioPage.jsx';
 import { AdminPage } from './pages/AdminPage.jsx';
-import { Header } from './components/Header.jsx';
+import { Header } from './components/Header';
 import { Toast } from './components/Toast.jsx';
 import { CompareBar } from './components/CompareBar.jsx';
 import { PropertyModal } from './components/modals/PropertyModal.jsx';
 import { NotesModal } from './components/modals/NotesModal.jsx';
 import { PropertyFormModal } from './components/modals/PropertyFormModal.jsx';
 import { CompareModal } from './components/modals/CompareModal.jsx';
-import { 
-    addLead, 
-    getLeads, 
-    updateLeadStatus, 
-    deleteLead,
-    addProperty,
-    getProperties,
-    updateProperty,
-    deleteProperty as deletePropertyService
-} from './services/firestore';
+import './index.css';
 
 export default function App() {
     const [leads, setLeads] = useState([]);
@@ -30,12 +22,16 @@ export default function App() {
     const [authLoading, setAuthLoading] = useState(true);
     
     const [currentPage, setCurrentPage] = useState('home');
+    const [isIntroAnimating, setIsIntroAnimating] = useState(true);
+    const [introHasRun, setIntroHasRun] = useState(false);
+    const finalLogoRef = useRef(null);
+    
     const [toast, setToast] = useState({ message: '', type: '', visible: false });
     const [selectedProperty, setSelectedProperty] = useState(null);
     const [editingProperty, setEditingProperty] = useState(null);
     const [isPropertyFormOpen, setPropertyFormOpen] = useState(false);
     const [selectedLeadForNotes, setSelectedLeadForNotes] = useState(null);
-    const [comparisonList, setComparisonList] = useState([]);
+    const [compareList, setCompareList] = useState([]);
     const [isCompareModalOpen, setCompareModalOpen] = useState(false);
 
     useEffect(() => {
@@ -56,8 +52,12 @@ export default function App() {
     
     const loadLeads = async () => {
         try {
-            const loadedLeads = await getLeads();
-            setLeads(loadedLeads);
+            const leadsSnapshot = await getDocs(collection(db, 'leads'));
+            const leadsData = leadsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setLeads(leadsData);
         } catch (error) {
             console.error("Error loading leads:", error);
             showToast('Error al cargar clientes', 'error');
@@ -66,8 +66,12 @@ export default function App() {
 
     const loadProperties = async () => {
         try {
-            const loadedProperties = await getProperties();
-            setProperties(loadedProperties);
+            const propertiesSnapshot = await getDocs(collection(db, 'properties'));
+            const propertiesData = propertiesSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setProperties(propertiesData);
         } catch (error) {
             console.error("Error loading properties:", error);
             showToast('Error al cargar propiedades', 'error');
@@ -81,41 +85,66 @@ export default function App() {
 
     const navigate = (page) => {
         setCurrentPage(page);
+        window.scrollTo(0, 0);
     };
+
+    const handleIntroFinish = useCallback(() => {
+        setIsIntroAnimating(false);
+        setIntroHasRun(true);
+    }, []);
+
+    useEffect(() => {
+        setIsIntroAnimating(currentPage === 'home' && !introHasRun);
+    }, [currentPage, introHasRun]);
 
     const handleAddLead = async (leadData) => {
         try {
-            await addLead(leadData);
-            showToast('¡Gracias! Su mensaje ha sido enviado.', 'success');
+            const leadWithTimestamp = {
+                ...leadData,
+                timestamp: serverTimestamp(),
+                status: 'pending',
+                notes: []
+            };
+            
+            const docRef = await addDoc(collection(db, 'leads'), leadWithTimestamp);
+            const newLead = { id: docRef.id, ...leadWithTimestamp, timestamp: new Date().toISOString() };
+            
+            setLeads([...leads, newLead]);
+            showToast("Contacto registrado correctamente", "success");
         } catch (error) {
             console.error("Error adding lead:", error);
-            showToast('Error al enviar el mensaje', 'error');
+            showToast("Error al registrar contacto", "error");
         }
     };
 
     const handleUpdateLeadStatus = async (id, status) => {
         try {
-            await updateLeadStatus(id, status);
-            setLeads(prev => prev.map(lead => lead.id === id ? { ...lead, status } : lead));
-            showToast('Estado actualizado');
+            const leadRef = doc(db, 'leads', id);
+            await updateDoc(leadRef, { status });
+            
+            const updatedLeads = leads.map(lead => 
+                lead.id === id ? { ...lead, status } : lead
+            );
+            setLeads(updatedLeads);
+            
+            showToast("Estado actualizado", "success");
         } catch (error) {
-            showToast('Error al actualizar', 'error');
-        }
-    };
-
-    const handleDeleteLead = async (id) => {
-        try {
-            await deleteLead(id);
-            setLeads(prev => prev.filter(lead => lead.id !== id));
-            showToast('Cliente eliminado.');
-        } catch (error) {
-            showToast('Error al eliminar', 'error');
+            console.error("Error updating lead status:", error);
+            showToast("Error al actualizar estado", "error");
         }
     };
     
-    const saveNoteToLead = (leadId, noteText) => {
-        console.log("Saving note (locally for now):", leadId, noteText);
+    const handleDeleteLead = async (id) => {
+        try {
+            await deleteDoc(doc(db, 'leads', id));
+            setLeads(leads.filter(lead => lead.id !== id));
+            showToast("Contacto eliminado", "success");
+        } catch (error) {
+            console.error("Error deleting lead:", error);
+            showToast("Error al eliminar contacto", "error");
+        }
     };
+    
     const readFileAsDataURL = (file) => new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
@@ -124,86 +153,243 @@ export default function App() {
     });
     const saveProperty = async (formData, imageFiles, brochureFile) => {
         try {
+            console.log("Iniciando guardado de propiedad:", formData);
+            
             let finalData = { ...formData };
+            
+            // Procesar imágenes si existen
             if (imageFiles?.length > 0) {
+                console.log("Procesando", imageFiles.length, "imágenes");
                 finalData.images = await Promise.all(Array.from(imageFiles).map(readFileAsDataURL));
+                console.log("Imágenes procesadas correctamente");
+            } else if (formData.images) {
+                // Mantener imágenes existentes si no se cargan nuevas
+                finalData.images = formData.images;
+                console.log("Manteniendo imágenes existentes");
             }
+            
+            // Procesar folleto si existe
             if (brochureFile) {
+                console.log("Procesando folleto");
                 finalData.brochure = await readFileAsDataURL(brochureFile);
+                console.log("Folleto procesado correctamente");
+            } else if (formData.brochure) {
+                // Mantener folleto existente si no se carga nuevo
+                finalData.brochure = formData.brochure;
+                console.log("Manteniendo folleto existente");
             }
+            
+            // Si tiene ID, actualizar propiedad existente
             if (finalData.id) {
-                const updated = await updateProperty(finalData.id, finalData);
-                setProperties(prev => prev.map(p => p.id === updated.id ? updated : p));
+                console.log("Actualizando propiedad existente con ID:", finalData.id);
+                const propertyRef = doc(db, 'properties', finalData.id);
+                await updateDoc(propertyRef, finalData);
+                
+                const updatedProperties = properties.map(property => 
+                    property.id === finalData.id ? { ...property, ...finalData } : property
+                );
+                setProperties(updatedProperties);
+                showToast("Propiedad actualizada correctamente", "success");
             } else {
-                const newProp = await addProperty(finalData);
-                setProperties(prev => [newProp, ...prev]);
+                // Crear nueva propiedad
+                console.log("Creando nueva propiedad");
+                const docRef = await addDoc(collection(db, 'properties'), finalData);
+                const newProperty = { id: docRef.id, ...finalData };
+                setProperties([...properties, newProperty]);
+                showToast("Propiedad añadida correctamente", "success");
             }
-            showToast(`Propiedad ${finalData.id ? 'actualizada' : 'agregada'}.`);
+            
+            // Cerrar modal y limpiar estado
             setPropertyFormOpen(false);
             setEditingProperty(null);
+            
+            console.log("Propiedad guardada con éxito");
         } catch (error) {
-            showToast('Error al guardar propiedad', 'error');
+            console.error("Error guardando propiedad:", error);
+            showToast("Error al guardar la propiedad: " + error.message, "error");
         }
     };
     const handleDeleteProperty = async (id) => { 
         try {
-            await deletePropertyService(id);
-            setProperties(prev => prev.filter(p => p.id !== id)); 
-            showToast('Propiedad eliminada.');
-        } catch(error) {
-            showToast('Error al eliminar propiedad', 'error');
+            await deleteDoc(doc(db, 'properties', id));
+            setProperties(properties.filter(property => property.id !== id));
+            showToast("Propiedad eliminada", "success");
+        } catch (error) {
+            console.error("Error deleting property:", error);
+            showToast("Error al eliminar propiedad", "error");
         }
     };
     const handleLogin = async (email, password) => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
+            showToast("Inicio de sesión exitoso", "success");
+            return true;
         } catch (error) {
-            showToast('Credenciales incorrectas.', 'error');
+            console.error("Login error:", error);
+            showToast("Error en el inicio de sesión", "error");
+            throw error;
         }
     };
     const handleLogout = async () => {
-        await signOut(auth);
+        try {
+            await signOut(auth);
+            showToast("Sesión cerrada", "success");
+        } catch (error) {
+            console.error("Logout error:", error);
+            showToast("Error al cerrar sesión", "error");
+        }
     };
     const downloadCSV = () => {
-        const csv = Papa.unparse(leads);
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'clientes_potenciales.csv';
+        if (leads.length === 0) {
+            showToast("No hay datos para exportar", "warning");
+            return;
+        }
+        
+        // Crear contenido CSV
+        const headers = ["Nombre", "Email", "Teléfono", "Mensaje", "Estado", "Fecha"];
+        const csvContent = [
+            headers.join(","),
+            ...leads.map(lead => {
+                const date = lead.timestamp ? new Date(lead.timestamp).toLocaleDateString() : "";
+                return [
+                    `"${lead.name || ''}"`, 
+                    `"${lead.email || ''}"`, 
+                    `"${lead.phone || ''}"`, 
+                    `"${lead.message || ''}"`, 
+                    `"${lead.status || ''}"`, 
+                    `"${date}"`
+                ].join(",");
+            })
+        ].join("\n");
+        
+        // Crear y descargar archivo
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `leads_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.display = "none";
+        document.body.appendChild(link);
         link.click();
-        URL.revokeObjectURL(link.href);
+        document.body.removeChild(link);
     };
-    const toggleCompare = (id) => setComparisonList(p => p.includes(id) ? p.filter(i => i !== id) : (p.length < 3 ? [...p, id] : p));
-    const clearComparison = () => setComparisonList([]);
-    const propertiesToCompare = properties.filter(p => comparisonList.includes(p.id));
-
-
-    const renderPage = () => {
-        if (authLoading && currentPage !== 'home') {
-             return <div className="text-center p-10 text-light">Cargando...</div>;
-        }
-        switch (currentPage) {
-            case 'portfolio': 
-                return <PortfolioPage properties={properties} onToggleCompare={toggleCompare} onOpenModal={setSelectedProperty} comparisonList={comparisonList} />;
-            case 'admin': 
-                return <AdminPage user={currentUser} onLogin={handleLogin} onLogout={handleLogout} leads={leads} properties={properties} onUpdateLeadStatus={handleUpdateLeadStatus} onDeleteLead={handleDeleteLead} onDeleteProperty={handleDeleteProperty} onOpenNotesModal={setSelectedLeadForNotes} onOpenPropertyForm={() => { setEditingProperty(null); setPropertyFormOpen(true); }} onEditProperty={(prop) => { setEditingProperty(prop); setPropertyFormOpen(true); }} onDownloadCSV={downloadCSV} />;
-            default: 
-                return <HomePage navigate={navigate} onAddLead={handleAddLead} />;
+    const toggleCompare = (property) => {
+        const exists = compareList.some(p => p.id === property.id);
+        if (exists) {
+            setCompareList(compareList.filter(p => p.id !== property.id));
+        } else {
+            setCompareList(compareList.length < 3 ? [...compareList, property] : compareList);
         }
     };
+    const clearComparison = () => setCompareList([]);
+    const propertiesToCompare = properties.filter(p => compareList.some(c => c.id === p.id));
+
+
+    const saveNoteToLead = async (leadId, notes) => {
+        try {
+            // Actualizar en Firestore
+            const leadRef = doc(db, 'leads', leadId);
+            await updateDoc(leadRef, { notes });
+            
+            // Actualizar en el estado local
+            setLeads(leads.map(lead => 
+                lead.id === leadId ? { ...lead, notes } : lead
+            ));
+            
+            // Mostrar notificación de éxito
+            setToast({
+                message: "Nota guardada correctamente",
+                type: "success",
+                visible: true
+            });
+            
+            setTimeout(() => {
+                setToast(prev => ({ ...prev, visible: false }));
+            }, 3000);
+        } catch (error) {
+            console.error("Error al guardar nota:", error);
+            setToast({
+                message: "Error al guardar la nota",
+                type: "error",
+                visible: true
+            });
+            
+            setTimeout(() => {
+                setToast(prev => ({ ...prev, visible: false }));
+            }, 3000);
+        }
+    };
+
+
+    useEffect(() => {
+        const handleClearComparison = () => {
+            clearComparison();
+        };
+        
+        window.addEventListener('clearComparison', handleClearComparison);
+        
+        return () => {
+            window.removeEventListener('clearComparison', handleClearComparison);
+        };
+    }, []);  
+
 
     return (
-        <>
-            <Header navigate={navigate} currentPage={currentPage} />
-            <main>{renderPage()}</main>
-
+        <div className="App bg-secondary min-h-screen text-light">
+            <Header 
+                currentPage={currentPage} 
+                navigate={navigate}
+                isIntroAnimating={isIntroAnimating}
+                finalLogoRef={finalLogoRef}
+                user={currentUser}
+            />
+            
+            <main>
+                {currentPage === 'home' ? (
+                    <HomePage 
+                        navigate={navigate} 
+                        onAddLead={handleAddLead} 
+                        onIntroFinish={handleIntroFinish}
+                        finalLogoRef={finalLogoRef}
+                    />
+                ) : currentPage === 'portfolio' ? (
+                    <PortfolioPage 
+    properties={properties} 
+    onOpenProperty={setSelectedProperty}
+    onToggleCompare={toggleCompare}
+    compareList={compareList}
+    onOpenCompare={() => setCompareModalOpen(true)}
+                    />
+                ) : (
+                    <AdminPage 
+                        user={currentUser}
+                        onLogin={handleLogin}
+                        onLogout={handleLogout}
+                        leads={leads}
+                        properties={properties}
+                        onUpdateLeadStatus={handleUpdateLeadStatus}
+                        onDeleteLead={handleDeleteLead}
+                        onDeleteProperty={handleDeleteProperty}
+                        onOpenPropertyForm={() => {}} // Ya no es necesario, manejaremos esto en AdminPage
+    onEditProperty={() => {}} // Ya no es necesario, manejaremos esto en AdminPage
+                        onOpenNotesModal={setSelectedLeadForNotes} 
+                        onDownloadCSV={downloadCSV} 
+                        navigate={navigate}
+                        onSaveProperty={saveProperty} // Esta es la función clave que hace el guardado real
+                        onSaveNotes={saveNoteToLead}
+                    />
+                )}
+            </main>
             <PropertyModal property={selectedProperty} onClose={() => setSelectedProperty(null)} />
             <NotesModal lead={selectedLeadForNotes} onClose={() => setSelectedLeadForNotes(null)} onSaveNote={saveNoteToLead} />
-            <PropertyFormModal isOpen={isPropertyFormOpen} onClose={() => { setPropertyFormOpen(false); setEditingProperty(null); }} onSave={saveProperty} propertyToEdit={editingProperty} />
-            <CompareModal properties={propertiesToCompare} isOpen={isCompareModalOpen} onClose={() => setCompareModalOpen(false)} />
+            {/* <PropertyFormModal isOpen={isPropertyFormOpen} onClose={() => { setPropertyFormOpen(false); setEditingProperty(null); }} onSave={saveProperty} propertyToEdit={editingProperty} /> */}
+            <CompareModal 
+    isOpen={isCompareModalOpen} 
+    onClose={() => setCompareModalOpen(false)} 
+    properties={compareList || []} 
+/>
             
-            {currentPage === 'portfolio' && <CompareBar properties={propertiesToCompare} onClear={clearComparison} onCompare={() => setCompareModalOpen(true)} />}
             {toast.visible && <Toast message={toast.message} type={toast.type} />}
-        </>
+        </div>
     );
 }
